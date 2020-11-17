@@ -10,6 +10,7 @@ This is my solution for Homework 5.
 library(tidyverse)
 library(purrr)
 library(ggplot2)
+library(dplyr)
 
 knitr::opts_chunk$set(
   fig.width = 6, 
@@ -111,8 +112,7 @@ path_df =
 Make a spaghetti plot. 
 
 ```{r}
-plot = 
-  path_df %>% 
+path_df %>% 
   pivot_longer(week_1:week_8, names_to = "week", values_to = "obs") %>% 
   mutate(
     week = str_remove_all(week, "week_")) %>%
@@ -128,12 +128,35 @@ plot =
 
 Looking at this plot of "Observations Over Time by Control Arm", we can see an overall trend of increasing values over time for all study participants in the experimental group. In contrast, the observations for the participants of the control group vary over time but the values remain relatively stable in terms of the beginning and ending values over the study period. 
 
-
 ## Problem 3 
 
-```{r}
+Set up simulation. 
 
+```{r}
+sample = function(n = 30, mu = 0, sigma = 5) {
+  samp_data = tibble(
+    x = rnorm(n, mean = mu, sd = sigma)) 
+  
+  samp_data %>% 
+    summarize(
+      mu = mean(x),
+      sigma = sd(x))
+  
+  samp_data %>%
+    t.test() %>%
+    broom::tidy()
+
+}
 
 ```
+
+Test Function 
+
+```{r}
+samp_results = 
+  rerun(5000, sample(30, 0, 5)) %>% 
+  bind_rows()
+```
+
 
 
