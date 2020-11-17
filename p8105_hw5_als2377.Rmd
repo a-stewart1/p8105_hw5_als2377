@@ -1,0 +1,7 @@
+---
+title: "Homework 5"
+author: Allison Stewart
+output: github_document
+---
+
+This is my solution for Homework 5. 
