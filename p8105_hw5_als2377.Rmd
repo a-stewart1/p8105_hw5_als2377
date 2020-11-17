@@ -8,6 +8,8 @@ This is my solution for Homework 5.
 
 ```{r setup, include = FALSE}
 library(tidyverse)
+library(purrr)
+library(ggplot2)
 
 knitr::opts_chunk$set(
   fig.width = 6, 
@@ -86,3 +88,52 @@ results_df %>%
 ```
 
 ## Problem 2
+
+Read in data and iterate over file names.  
+
+```{r}
+path_df = 
+  tibble(
+    path = list.files("data"),
+  ) %>% 
+  mutate(
+    path = str_c("data/", path),
+    data = map(path, read_csv)) %>% 
+  unnest() %>% 
+  mutate(
+    path = str_remove_all(path, ".csv"), 
+    path = str_remove_all(path, "data/"), 
+    path = str_replace_all(path, "con", "control"), 
+    path = str_replace_all(path, "exp", "experiment")) %>% 
+  separate(path, into = c("control_arm", "subject_id")) 
+```
+
+Make a spaghetti plot. 
+
+```{r}
+plot = 
+  path_df %>% 
+  pivot_longer(week_1:week_8, names_to = "week", values_to = "obs") %>% 
+  mutate(
+    week = str_remove_all(week, "week_")) %>%
+  mutate(week = as.numeric(week)) %>% 
+  ggplot(aes(x = week, y = obs, group = subject_id, color = subject_id)) + 
+  geom_line() + facet_grid(.~control_arm) + 
+  labs(
+    title = "Observations Over Time by Control Arm", 
+    x = "Week", 
+    y = "Observation"
+  )
+```
+
+Looking at this plot of "Observations Over Time by Control Arm", we can see an overall trend of increasing values over time for all study participants in the experimental group. In contrast, the observations for the participants of the control group vary over time but the values remain relatively stable in terms of the beginning and ending values over the study period. 
+
+
+## Problem 3 
+
+```{r}
+
+
+```
+
+
