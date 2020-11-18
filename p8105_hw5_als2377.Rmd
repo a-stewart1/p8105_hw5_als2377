@@ -12,6 +12,7 @@ library(purrr)
 library(ggplot2)
 library(dplyr)
 library(stringr)
+library(patchwork)
 
 knitr::opts_chunk$set(
   fig.width = 6, 
@@ -222,7 +223,13 @@ plot_data =
       )) %>% 
   mutate(
     mu = recode(mu, "1" = "0", "2" = "1", "3" = "2", "4" = "3", "5" = "4", "6" = "5", "7" = "6")) %>% 
-  mutate(mu = as.numeric(mu)) %>% 
+  mutate(mu = as.numeric(mu)) 
+```
+
+Plot proportion of times null is rejected 
+
+```{r}
+plot_data %>% 
   group_by(mu) %>% 
   mutate(
     power = sum(test_results == "reject") / 5000
@@ -234,9 +241,36 @@ plot_data =
   )
 ```
 
-This plots shows that there is a positive association between effect size and power. As effect size increase, power increases. 
+This plots shows that there is a positive association between effect size and power. As effect size increases, power increases. 
+
+Plot avg estimate of Mu by true Mu  
 
 ```{r}
+plot_1 = 
+plot_data %>% 
+  group_by(mu) %>% 
+  mutate(
+    mean_estimate = mean(estimate)) %>% 
+  ggplot(aes(x = mu, y = mean_estimate)) + geom_point() + labs(
+    title = "Avg Est. of Mu by True Mu", 
+    x = "True Mu", 
+    y = "Average Estimate of Mu"
+  )
+
+plot_2 = 
+  plot_data %>% 
+  filter(test_results == "reject") %>% 
+  group_by(mu) %>% 
+  mutate(
+    mean_estimate = mean(estimate)) %>% 
+  ggplot(aes(x = mu, y = mean_estimate)) + geom_point() + labs(
+    title = "Avg Est. of Mu when Null is Rejected", 
+    x = "True Mu",
+    y = "Average Estimate of Mu"
+  )
+  
+plot_1 + plot_2
+
 ```
 
-
+The sample average of mu across the tests for which the null i rejected is approximately equal to the true value of mu.
